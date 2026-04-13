@@ -1,0 +1,2 @@
+# Questo file non è più necessario.
+# Apache usa un Alias diretto a /public tramite httpd-vhosts.conf
