@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="margin:0;padding:0;">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="margin:0;padding:0;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,8 +32,12 @@
         .announcement-bar { background:var(--green); color:#fff; text-align:center; padding:8px; font-size:13px; letter-spacing:0.5px; margin:0; margin-top: 0 !important; }
         .site-header { position:sticky; top:0; z-index:1000; background:#fff; border-bottom:1px solid var(--border); }
         .navbar-main { display:flex; align-items:center; justify-content:space-between; padding:16px 40px; max-width:1400px; margin:0 auto; }
-        .navbar-brand-logo { font-family:'Simplified Arabic Fixed',serif; font-size:30px; font-weight:700; color:#9bc3b1; text-decoration:none; letter-spacing:0; }
+        .navbar-brand-logo { display:flex; flex-direction:column; align-items:center; gap:2px; font-family:'Simplified Arabic Fixed',serif; font-size:30px; font-weight:700; color:#9bc3b1; text-decoration:none; letter-spacing:0; line-height:1; }
         .navbar-brand-logo:hover { color:#6fa398; text-decoration:none; }
+        .navbar-brand-logo:hover .rosmarino-dog-icon { color:#6fa398; }
+        .rosmarino-dog-icon { color:#9bc3b1; display:block; flex-shrink:0; }
+        .navbar-brand-dog { width:72px; height:auto; }
+        #page-loader-dog { width:150px; height:auto; margin-top:4px; }
         .nav-links { display:flex; gap:32px; list-style:none; margin:0; padding:0; }
         .nav-links a { color:var(--black); text-decoration:none; font-size:13px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; transition:color .2s; }
         .nav-links a:hover,.nav-links a.active { color:var(--green-dark); }
@@ -147,6 +151,7 @@
 <div id="page-loader">
     <div id="page-loader-inner">
         <span id="page-loader-brand">.rosmarino</span>
+        @include('partials.bassotto-icon', ['class' => 'page-loader-dog', 'id' => 'page-loader-dog', 'stroke' => '1.6'])
         <div id="page-loader-bar-wrap">
             <div id="page-loader-bar"></div>
         </div>
@@ -161,7 +166,10 @@
         <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
-        <a href="{{ route('home') }}" class="navbar-brand-logo">.rosmarino</a>
+        <a href="{{ route('home') }}" class="navbar-brand-logo">
+            <span>.rosmarino</span>
+            @include('partials.bassotto-icon', ['class' => 'navbar-brand-dog', 'stroke' => '1.5'])
+        </a>
         <ul class="nav-links">
             <li><a href="{{ route('collection') }}" class="{{ request()->routeIs('collection*','category*') ? 'active' : '' }}">{{ __('front.nav_collection') }}</a></li>
             <li><a href="{{ route('best-sellers') }}" class="{{ request()->routeIs('best-sellers') ? 'active' : '' }}">{{ __('front.nav_best_sellers') }}</a></li>

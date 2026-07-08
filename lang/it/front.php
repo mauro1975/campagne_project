@@ -115,9 +115,27 @@ return [
     'photos_instagram'   => 'Seguici su Instagram',
 
     // ── Pagina Chi Siamo ──────────────────────────────────────────────
-    'about_hero_eyebrow' => 'La Nostra Storia',
-    'about_hero_title'   => 'Fatto con Amore<br>per Ogni Cane',
-    'about_hero_text'    => 'Abbiamo fondato .rosmarino perché credevamo che ogni cane meritasse accessori belli e di alta qualità – non solo funzionali. Il golden retriever Max del nostro fondatore è stata l\'ispirazione per tutto.',
+    'about_hero_eyebrow' => 'Il Mondo Rosmarino',
+    'about_hero_title'   => 'Il Lusso per i Piccoli di Casa',
+    'about_hero_text'    => '<p>Rosmarino nasce da un\'idea semplice ma ambiziosa: portare l\'eccellenza della grande tradizione artigianale italiana nel guardaroba dei cani di piccola taglia. Proprio come la pianta da cui prendiamo il nome – simbolo di affetto, ricordi preziosi e radici italiane – creiamo collezioni pensate per durare nel tempo, unendo il massimo comfort a un\'estetica raffinata.</p>
+<p>Ogni capo e accessorio è una dichiarazione d\'amore per i vostri fedeli compagni, pensata per valorizzare la loro bellezza e proteggere il loro benessere.</p>
+
+<p>La nostra linea di maglieria avvolge i cani più piccoli in un abbraccio di pura morbidezza.</p>
+<ul>
+<li>100% cashmere pregiato di origine italiana</li>
+<li>Filati leggeri, traspiranti e caldissimi</li>
+<li>Massimo rispetto per la pelle delicata del cane</li>
+<li>Tagli studiati per garantire totale libertà di movimento</li>
+</ul>
+<h4>Accessori in vera pelle: eleganza in movimento</h4>
+<p>Per il momento della passeggiata, Rosmarino propone una linea coordinata dal design impeccabile.</p>
+<ul>
+<li>Guinzagli e porta-sacchetti in 100% vera pelle italiana</li>
+<li>Lavorazione artigianale con cuciture e finiture di alta qualità</li>
+<li>Palette di colori per abbinarsi allo stile di ogni proprietario</li>
+<li>Accessori funzionali, resistenti e incredibilmente chic</li>
+</ul>
+</p>',
     'about_values_eyebrow' => 'Cosa ci spinge',
     'about_values_heading' => 'Qualità in Ogni Punto',
     'about_values_p1'    => 'Ogni prodotto nel nostro negozio è selezionato a mano o progettato dal nostro team. Lavoriamo solo con materiali sicuri, duraturi e alla moda. Testiamo ogni articolo sui nostri cani prima che arrivi in negozio.',
