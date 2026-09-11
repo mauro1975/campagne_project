@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -22,11 +24,16 @@ class AuthController extends Controller
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
+            'role'     => 'user',
         ]);
 
         $token = $user->createToken('auth_token')->accessToken;
 
-        return response()->json(['user' => $user, 'token' => $token], 201);
+        return response()->json([
+            'user'  => new UserResource($user),
+            'token' => $token,
+            'type'  => 'Bearer',
+        ], 201);
     }
 
     public function login(Request $request)
@@ -44,17 +51,22 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->accessToken;
 
-        return response()->json(['user' => $user, 'token' => $token]);
+        return response()->json([
+            'user'  => new UserResource($user),
+            'token' => $token,
+            'type'  => 'Bearer',
+        ]);
     }
 
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
+
         return response()->json(['message' => 'Logged out successfully.']);
     }
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return new UserResource($request->user());
     }
 }

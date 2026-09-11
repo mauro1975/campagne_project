@@ -135,6 +135,9 @@
         </a>
 
         <div class="admin-nav-section">Contenuti</div>
+        <a href="{{ route('admin.collection') }}" class="{{ request()->routeIs('admin.collection*') ? 'active' : '' }}">
+            <i class="bi bi-grid-3x3-gap"></i> Collezione
+        </a>
         <a href="{{ route('admin.gallery') }}" class="{{ request()->routeIs('admin.gallery*') ? 'active' : '' }}">
             <i class="bi bi-images"></i> Gallery Home
         </a>

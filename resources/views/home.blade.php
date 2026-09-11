@@ -137,18 +137,14 @@
 
     @if($categories->count() > 0)
         <div class="cat-grid">
-            @php
-                $catImages = [
-                    'collars'      => 'https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTFbudB83Yln0QDQn6X3H4i0rFUNdsT-nivq7T_aE7uJzd3wDdZIT04-GSBPoD9HouR3WusEe7j8eu5Cfha3v2B8qqjKBUeO3jVxc4SNdhIhdd3hNL242VQLVjfT_KgIcukVa2GhA4&usqp=CAc',
-                    'leashes'      => 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&auto=format&fit=crop',
-                    'coats'        => 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&auto=format&fit=crop',
-                    'harnesses'    => 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=400&auto=format&fit=crop',
-                    'bag-holders'  => 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=400&auto=format&fit=crop',
-                ];
-            @endphp
             @foreach($categories as $cat)
+                @php
+                    $coverUrl = $cat->image
+                        ? asset($cat->image)
+                        : 'https://placehold.co/400x500/e0f0eb/6fa398?text=' . urlencode($cat->name);
+                @endphp
                 <a href="{{ route('category.show', $cat->slug) }}" class="cat-card">
-                    <img src="{{ $cat->image ? asset($cat->image) : ($catImages[$cat->slug] ?? 'https://placehold.co/400x500/9ad7a0/fff?text='.urlencode($cat->name)) }}" alt="{{ $cat->name }}">
+                    <img src="{{ $coverUrl }}" alt="{{ $cat->name }}" loading="lazy">
                     <div class="cat-card-label">
                         <h3>{{ $cat->name }}</h3>
                         <p style="margin:4px 0 0;font-size:13px;opacity:0.85;">{{ __('front.home_cat_explore') }}</p>

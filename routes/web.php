@@ -57,6 +57,9 @@ Route::middleware("auth")->prefix("admin")->name("admin.")->group(function () {
     Route::post("/categories", [AdminWebController::class, "storeCategory"])->name("categories.store");
     Route::put("/categories/{category}", [AdminWebController::class, "updateCategory"])->name("categories.update");
     Route::delete("/categories/{category}", [AdminWebController::class, "destroyCategory"])->name("categories.delete");
+    Route::get("/collection", [AdminWebController::class, "collectionImages"])->name("collection");
+    Route::post("/collection/{category}/image", [AdminWebController::class, "updateCollectionCategoryImage"])->name("collection.image");
+    Route::delete("/collection/{category}/image", [AdminWebController::class, "destroyCollectionCategoryImage"])->name("collection.image.destroy");
     Route::get("/orders", [AdminWebController::class, "orders"])->name("orders");
     Route::get("/orders/{order}", [AdminWebController::class, "showOrder"])->name("orders.show");
     Route::post("/orders/{order}/status", [AdminWebController::class, "updateOrderStatus"])->name("orders.status");

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Discount;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
@@ -17,14 +19,17 @@ class CartController extends Controller
         if ($request->user()) {
             return Cart::firstOrCreate(['user_id' => $request->user()->id]);
         }
-        $sessionId = $request->cookie('cart_session') ?? (string) \Str::uuid();
+
+        $sessionId = $request->header('X-Cart-Session') ?? $request->input('session_id') ?? (string) Str::uuid();
+
         return Cart::firstOrCreate(['session_id' => $sessionId]);
     }
 
     public function index(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
-        return response()->json($cart->load('items.product'));
+
+        return new CartResource($cart->load('items.product'));
     }
 
     public function add(Request $request)
@@ -43,7 +48,6 @@ class CartController extends Controller
             ->first();
 
         $price = $product->final_price + ($variant?->price_adjustment ?? 0);
-
         $cart = $this->getOrCreateCart($request);
 
         $existingItem = $cart->items()
@@ -65,19 +69,21 @@ class CartController extends Controller
             ]);
         }
 
-        return response()->json($cart->fresh()->load('items.product'));
+        return new CartResource($cart->fresh()->load('items.product'));
     }
 
     public function update(Request $request, CartItem $item)
     {
         $data = $request->validate(['quantity' => 'required|integer|min:1|max:10']);
         $item->update($data);
-        return response()->json(['message' => 'Updated.']);
+
+        return response()->json(['message' => 'Cart item updated.']);
     }
 
     public function remove(CartItem $item)
     {
         $item->delete();
+
         return response()->json(['message' => 'Item removed.']);
     }
 
@@ -85,6 +91,7 @@ class CartController extends Controller
     {
         $cart = $this->getOrCreateCart($request);
         $cart->items()->delete();
+
         return response()->json(['message' => 'Cart cleared.']);
     }
 

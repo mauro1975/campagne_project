@@ -349,6 +349,33 @@ class AdminWebController extends Controller
         return view('admin.categories', compact('categories'));
     }
 
+    public function collectionImages()
+    {
+        $categories = Category::withCount('products')->orderBy('sort_order')->get();
+
+        return view('admin.collection', compact('categories'));
+    }
+
+    public function updateCollectionCategoryImage(Request $request, Category $category)
+    {
+        $request->validate([
+            'image' => 'required|image|max:4096',
+        ]);
+
+        $this->deleteCategoryImageFile($category->image);
+        $category->update(['image' => $this->storeCategoryImageFile($request->file('image'))]);
+
+        return redirect()->route('admin.collection')->with('success', "Immagine aggiornata per «{$category->getRawOriginal('name')}».");
+    }
+
+    public function destroyCollectionCategoryImage(Category $category)
+    {
+        $this->deleteCategoryImageFile($category->image);
+        $category->update(['image' => null]);
+
+        return redirect()->route('admin.collection')->with('success', 'Immagine rimossa.');
+    }
+
     public function storeCategory(Request $request)
     {
         $data = $request->validate([
@@ -356,17 +383,13 @@ class AdminWebController extends Controller
             'name_en'        => 'nullable|string|max:100',
             'description'    => 'nullable|string',
             'description_en' => 'nullable|string',
-            'image'          => 'nullable|file|max:4096',
+            'image'          => 'nullable|image|max:4096',
             'sort_order'     => 'integer',
         ]);
         $data['slug'] = Str::slug($data['name']);
+        $data['is_active'] = $request->boolean('is_active', true);
         if ($request->hasFile('image')) {
-            $dir = public_path('images/categories');
-            if (!is_dir($dir)) mkdir($dir, 0755, true);
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($dir, $filename);
-            $data['image'] = 'images/categories/' . $filename;
+            $data['image'] = $this->storeCategoryImageFile($request->file('image'));
         } else {
             unset($data['image']);
         }
@@ -459,21 +482,14 @@ class AdminWebController extends Controller
             'name_en'        => 'nullable|string|max:100',
             'description'    => 'nullable|string',
             'description_en' => 'nullable|string',
-            'image'          => 'nullable|file|max:4096',
+            'image'          => 'nullable|image|max:4096',
             'sort_order'     => 'nullable|integer',
         ]);
         $data['slug'] = Str::slug($data['name']);
+        $data['is_active'] = $request->boolean('is_active');
         if ($request->hasFile('image')) {
-            if ($category->image) {
-                $abs = public_path($category->image);
-                if (file_exists($abs)) unlink($abs);
-            }
-            $dir = public_path('images/categories');
-            if (!is_dir($dir)) mkdir($dir, 0755, true);
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move($dir, $filename);
-            $data['image'] = 'images/categories/' . $filename;
+            $this->deleteCategoryImageFile($category->image);
+            $data['image'] = $this->storeCategoryImageFile($request->file('image'));
         } else {
             unset($data['image']);
         }
@@ -483,12 +499,32 @@ class AdminWebController extends Controller
 
     public function destroyCategory(Category $category)
     {
-        if ($category->image) {
-            $abs = public_path($category->image);
-            if (file_exists($abs)) unlink($abs);
-        }
+        $this->deleteCategoryImageFile($category->image);
         $category->delete();
         return redirect()->route('admin.categories')->with('success', 'Category deleted!');
+    }
+
+    protected function storeCategoryImageFile(\Illuminate\Http\UploadedFile $file): string
+    {
+        $dir = public_path('images/categories');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move($dir, $filename);
+
+        return 'images/categories/' . $filename;
+    }
+
+    protected function deleteCategoryImageFile(?string $path): void
+    {
+        if (!$path) {
+            return;
+        }
+        $abs = public_path($path);
+        if (file_exists($abs)) {
+            unlink($abs);
+        }
     }
 
     public function destroyDiscount(Discount $discount)

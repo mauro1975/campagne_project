@@ -10,20 +10,15 @@
         <h1>{{ __('front.collection_heading') }}</h1>
     </div>
 
-    @php
-        $catImages = [
-            'collars'     => 'https://images.unsplash.com/photo-1506792006827-cd291f4930d2?w=600&auto=format&fit=crop',
-            'leashes'     => 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&auto=format&fit=crop',
-            'coats'       => 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&auto=format&fit=crop',
-            'harnesses'   => 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600&auto=format&fit=crop',
-            'bag-holders' => 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600&auto=format&fit=crop',
-        ];
-    @endphp
-
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;" class="cat-collection-grid">
         @foreach($categories as $cat)
+        @php
+            $coverUrl = $cat->image
+                ? asset($cat->image)
+                : 'https://placehold.co/600x750/e0f0eb/6fa398?text=' . urlencode($cat->name);
+        @endphp
         <a href="{{ route('category.show', $cat->slug) }}" class="cat-card" style="aspect-ratio:4/5;">
-            <img src="{{ $cat->image ? asset($cat->image) : ($catImages[$cat->slug] ?? 'https://placehold.co/600x750/9ad7a0/fff?text='.urlencode($cat->name)) }}"
+            <img src="{{ $coverUrl }}"
                  alt="{{ $cat->name }}" loading="lazy">
             <div class="cat-card-label">
                 <h3>{{ $cat->name }}</h3>

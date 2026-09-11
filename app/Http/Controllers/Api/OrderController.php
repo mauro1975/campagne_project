@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use App\Models\Cart;
 use App\Models\Discount;
 use App\Models\Order;
@@ -17,7 +18,8 @@ class OrderController extends Controller
             ->with('items')
             ->latest()
             ->paginate(10);
-        return response()->json($orders);
+
+        return OrderResource::collection($orders);
     }
 
     public function store(Request $request)
@@ -32,12 +34,12 @@ class OrderController extends Controller
             'country'        => 'nullable|string|max:5',
             'payment_method' => 'required|in:credit_card,paypal',
             'discount_code'  => 'nullable|string',
+            'session_id'     => 'nullable|string',
         ]);
 
-        // Resolve cart
         $cart = $request->user()
             ? Cart::where('user_id', $request->user()->id)->with('items.product')->first()
-            : Cart::where('session_id', $request->cookie('cart_session'))->with('items.product')->first();
+            : Cart::where('session_id', $request->input('session_id'))->with('items.product')->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json(['message' => 'Your cart is empty.'], 422);
@@ -66,7 +68,7 @@ class OrderController extends Controller
             'address'         => $data['address'],
             'city'            => $data['city'],
             'postal_code'     => $data['postal_code'],
-            'country'         => $data['country'] ?? 'FR',
+            'country'         => $data['country'] ?? 'IT',
             'payment_method'  => $data['payment_method'],
             'subtotal'        => $subtotal,
             'discount_amount' => $discountAmount,
@@ -87,24 +89,23 @@ class OrderController extends Controller
                 'price'        => $item->price,
             ]);
 
-            // Decrement stock
             if ($item->variant_id) {
                 ProductVariant::where('id', $item->variant_id)
                     ->decrement('stock', $item->quantity);
             }
         }
 
-        // Clear cart
         $cart->items()->delete();
 
-        return response()->json($order->load('items'), 201);
+        return (new OrderResource($order->load('items')))->response()->setStatusCode(201);
     }
 
     public function show(Request $request, Order $order)
     {
-        if ($order->user_id !== $request->user()?->id) {
+        if ($order->user_id !== $request->user()?->id && !$request->user()?->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
-        return response()->json($order->load('items'));
+
+        return new OrderResource($order->load('items'));
     }
 }

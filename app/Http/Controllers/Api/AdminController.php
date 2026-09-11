@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\ProductResource;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\Category;
-use App\Models\PageVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -50,10 +50,12 @@ class AdminController extends Controller
     public function orders(Request $request)
     {
         $query = Order::with('items')->latest();
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        return response()->json($query->paginate(20));
+
+        return OrderResource::collection($query->paginate(20));
     }
 
     public function updateOrder(Request $request, Order $order)
@@ -62,16 +64,17 @@ class AdminController extends Controller
             'status'         => 'in:pending,processing,shipped,delivered,cancelled',
             'payment_status' => 'in:pending,paid,failed,refunded',
         ]);
+
         $order->update($data);
-        return response()->json($order);
+
+        return new OrderResource($order->load('items'));
     }
 
-    public function products(Request $request)
+    public function products()
     {
-        $products = Product::with('category', 'variants')
-            ->latest()
-            ->paginate(20);
-        return response()->json($products);
+        $products = Product::with('category', 'variants')->latest()->paginate(20);
+
+        return ProductResource::collection($products);
     }
 
     public function updateProduct(Request $request, Product $product)
@@ -83,26 +86,9 @@ class AdminController extends Controller
             'is_best_seller'   => 'boolean',
             'is_featured'      => 'boolean',
         ]);
+
         $product->update($data);
-        return response()->json($product);
-    }
 
-    public function discounts()
-    {
-        return response()->json(\App\Models\Discount::latest()->get());
-    }
-
-    public function storeDiscount(Request $request)
-    {
-        $data = $request->validate([
-            'code'       => 'required|string|unique:discounts',
-            'type'       => 'required|in:percent,fixed',
-            'value'      => 'required|numeric|min:0',
-            'min_amount' => 'numeric|min:0',
-            'max_uses'   => 'nullable|integer|min:1',
-            'expires_at' => 'nullable|date',
-        ]);
-        $data['code'] = strtoupper($data['code']);
-        return response()->json(\App\Models\Discount::create($data), 201);
+        return new ProductResource($product->load('category', 'variants'));
     }
 }

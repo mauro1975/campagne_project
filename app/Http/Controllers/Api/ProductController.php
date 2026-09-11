@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -16,10 +16,10 @@ class ProductController extends Controller
         $query = Product::with('category', 'variants')->where('is_active', true);
 
         if ($request->filled('category')) {
-            $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
+            $query->whereHas('category', fn ($q) => $q->where('slug', $request->category));
         }
         if ($request->filled('search')) {
-            $query->where('name', 'like', "%{$request->search}%");
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
         if ($request->boolean('best_sellers')) {
             $query->where('is_best_seller', true);
@@ -28,12 +28,12 @@ class ProductController extends Controller
             $query->where('is_featured', true);
         }
 
-        return response()->json($query->paginate(12));
+        return ProductResource::collection($query->paginate(12));
     }
 
     public function show(Product $product)
     {
-        return response()->json($product->load('category', 'variants'));
+        return new ProductResource($product->load('category', 'variants'));
     }
 
     public function store(Request $request)
@@ -41,12 +41,17 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id'      => 'required|exists:categories,id',
             'name'             => 'required|string|max:255',
+            'name_en'          => 'nullable|string|max:255',
             'description'      => 'nullable|string',
+            'description_en'   => 'nullable|string',
             'price'            => 'required|numeric|min:0',
             'compare_price'    => 'nullable|numeric|min:0',
             'discount_percent' => 'integer|min:0|max:100',
+            'stock'            => 'integer|min:0',
+            'sku'              => 'nullable|string|max:255|unique:products,sku',
             'is_featured'      => 'boolean',
             'is_best_seller'   => 'boolean',
+            'is_active'        => 'boolean',
             'available_colors' => 'nullable|array',
             'available_sizes'  => 'nullable|array',
             'seo_title'        => 'nullable|string|max:255',
@@ -63,7 +68,7 @@ class ProductController extends Controller
             }
         }
 
-        return response()->json($product->load('variants'), 201);
+        return (new ProductResource($product->load('variants')))->response()->setStatusCode(201);
     }
 
     public function update(Request $request, Product $product)
@@ -71,10 +76,14 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id'      => 'exists:categories,id',
             'name'             => 'string|max:255',
+            'name_en'          => 'nullable|string|max:255',
             'description'      => 'nullable|string',
+            'description_en'   => 'nullable|string',
             'price'            => 'numeric|min:0',
             'compare_price'    => 'nullable|numeric|min:0',
             'discount_percent' => 'integer|min:0|max:100',
+            'stock'            => 'integer|min:0',
+            'sku'              => 'nullable|string|max:255|unique:products,sku,' . $product->id,
             'is_active'        => 'boolean',
             'is_featured'      => 'boolean',
             'is_best_seller'   => 'boolean',
@@ -89,12 +98,14 @@ class ProductController extends Controller
         }
 
         $product->update($data);
-        return response()->json($product->load('variants'));
+
+        return new ProductResource($product->load('category', 'variants'));
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
+
         return response()->json(['message' => 'Product deleted.']);
     }
 
@@ -102,7 +113,11 @@ class ProductController extends Controller
     {
         $request->validate(['image' => 'required|image|max:2048']);
         $path = $request->file('image')->store('products', 'public');
-        $product->update(['image' => $path]);
-        return response()->json(['image' => $path]);
+        $product->update(['image' => 'storage/' . $path]);
+
+        return response()->json([
+            'image'     => $product->image,
+            'image_url' => asset($product->image),
+        ]);
     }
 }

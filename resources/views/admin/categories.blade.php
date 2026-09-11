@@ -51,8 +51,11 @@
                     <input type="text" name="slug" id="catSlug" class="form-control" value="{{ old('slug') }}" placeholder="auto-generated">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Immagine</label>
+                    <label class="form-label">Immagine copertina</label>
                     <input type="file" name="image" class="form-control" accept="image/*">
+                    <p style="font-size:12px;color:#888;margin-top:6px;margin-bottom:0;">
+                        Usata in <a href="{{ route('admin.collection') }}">La Nostra Collezione</a> e in homepage.
+                    </p>
                     <div id="currentImageWrap" style="margin-top:8px;display:none;">
                         <img id="currentImage" src="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;" alt="">
                         <p style="font-size:12px;color:#999;margin-top:4px;">Immagine attuale (lascia vuoto per mantenerla)</p>
